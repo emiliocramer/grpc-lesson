@@ -2,17 +2,57 @@ syntax = "proto3";
 
 package proto;
 
-option go_package = "./main";
+option go_package = "./proto";
 
 service CalculatorService {
   rpc TimesTen(Message) returns (Response) {}
+  rpc Decompose(DecomposeRequest) returns (stream DecomposeResponse) {}
+  rpc ComputeAverage(stream ComputeAverageRequest) returns (ComputeAverageResponse) {}
+  rpc FindMaximum(stream FindMaximumRequest) returns (stream FindMaximumResponse) {}
+
+  rpc CalculateWithDeadline(CalculateWithDeadlineRequest) returns (CalculateWithDeadlineResponse) {}
 }
 
 message Message {
-  string say = 1;
+  int32 say = 1;
 }
 
 message Response {
-  string say = 1;
+  int32 say = 1;
 }
+
+message DecomposeRequest {
+  int32 number = 1;
+}
+
+message DecomposeResponse {
+  int32 factor = 1;
+}
+
+message ComputeAverageRequest {
+  float number = 1;
+}
+
+message ComputeAverageResponse {
+  float average = 1;
+}
+
+message FindMaximumRequest {
+  int32 number = 1;
+}
+
+message FindMaximumResponse {
+  int32 number = 1;
+}
+
+message CalculateWithDeadlineRequest {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+message CalculateWithDeadlineResponse {
+  int32 result = 1;
+}
+
+
 

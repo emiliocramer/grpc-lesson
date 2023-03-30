@@ -23,6 +23,10 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CalculatorServiceClient interface {
 	TimesTen(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Response, error)
+	Decompose(ctx context.Context, in *DecomposeRequest, opts ...grpc.CallOption) (CalculatorService_DecomposeClient, error)
+	ComputeAverage(ctx context.Context, opts ...grpc.CallOption) (CalculatorService_ComputeAverageClient, error)
+	FindMaximum(ctx context.Context, opts ...grpc.CallOption) (CalculatorService_FindMaximumClient, error)
+	CalculateWithDeadline(ctx context.Context, in *CalculateWithDeadlineRequest, opts ...grpc.CallOption) (*CalculateWithDeadlineResponse, error)
 }
 
 type calculatorServiceClient struct {
@@ -42,11 +46,121 @@ func (c *calculatorServiceClient) TimesTen(ctx context.Context, in *Message, opt
 	return out, nil
 }
 
+func (c *calculatorServiceClient) Decompose(ctx context.Context, in *DecomposeRequest, opts ...grpc.CallOption) (CalculatorService_DecomposeClient, error) {
+	stream, err := c.cc.NewStream(ctx, &CalculatorService_ServiceDesc.Streams[0], "/proto.CalculatorService/Decompose", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &calculatorServiceDecomposeClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type CalculatorService_DecomposeClient interface {
+	Recv() (*DecomposeResponse, error)
+	grpc.ClientStream
+}
+
+type calculatorServiceDecomposeClient struct {
+	grpc.ClientStream
+}
+
+func (x *calculatorServiceDecomposeClient) Recv() (*DecomposeResponse, error) {
+	m := new(DecomposeResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *calculatorServiceClient) ComputeAverage(ctx context.Context, opts ...grpc.CallOption) (CalculatorService_ComputeAverageClient, error) {
+	stream, err := c.cc.NewStream(ctx, &CalculatorService_ServiceDesc.Streams[1], "/proto.CalculatorService/ComputeAverage", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &calculatorServiceComputeAverageClient{stream}
+	return x, nil
+}
+
+type CalculatorService_ComputeAverageClient interface {
+	Send(*ComputeAverageRequest) error
+	CloseAndRecv() (*ComputeAverageResponse, error)
+	grpc.ClientStream
+}
+
+type calculatorServiceComputeAverageClient struct {
+	grpc.ClientStream
+}
+
+func (x *calculatorServiceComputeAverageClient) Send(m *ComputeAverageRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *calculatorServiceComputeAverageClient) CloseAndRecv() (*ComputeAverageResponse, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(ComputeAverageResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *calculatorServiceClient) FindMaximum(ctx context.Context, opts ...grpc.CallOption) (CalculatorService_FindMaximumClient, error) {
+	stream, err := c.cc.NewStream(ctx, &CalculatorService_ServiceDesc.Streams[2], "/proto.CalculatorService/FindMaximum", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &calculatorServiceFindMaximumClient{stream}
+	return x, nil
+}
+
+type CalculatorService_FindMaximumClient interface {
+	Send(*FindMaximumRequest) error
+	Recv() (*FindMaximumResponse, error)
+	grpc.ClientStream
+}
+
+type calculatorServiceFindMaximumClient struct {
+	grpc.ClientStream
+}
+
+func (x *calculatorServiceFindMaximumClient) Send(m *FindMaximumRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *calculatorServiceFindMaximumClient) Recv() (*FindMaximumResponse, error) {
+	m := new(FindMaximumResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *calculatorServiceClient) CalculateWithDeadline(ctx context.Context, in *CalculateWithDeadlineRequest, opts ...grpc.CallOption) (*CalculateWithDeadlineResponse, error) {
+	out := new(CalculateWithDeadlineResponse)
+	err := c.cc.Invoke(ctx, "/proto.CalculatorService/CalculateWithDeadline", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CalculatorServiceServer is the server API for CalculatorService service.
 // All implementations must embed UnimplementedCalculatorServiceServer
 // for forward compatibility
 type CalculatorServiceServer interface {
 	TimesTen(context.Context, *Message) (*Response, error)
+	Decompose(*DecomposeRequest, CalculatorService_DecomposeServer) error
+	ComputeAverage(CalculatorService_ComputeAverageServer) error
+	FindMaximum(CalculatorService_FindMaximumServer) error
+	CalculateWithDeadline(context.Context, *CalculateWithDeadlineRequest) (*CalculateWithDeadlineResponse, error)
 	mustEmbedUnimplementedCalculatorServiceServer()
 }
 
@@ -56,6 +170,18 @@ type UnimplementedCalculatorServiceServer struct {
 
 func (UnimplementedCalculatorServiceServer) TimesTen(context.Context, *Message) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TimesTen not implemented")
+}
+func (UnimplementedCalculatorServiceServer) Decompose(*DecomposeRequest, CalculatorService_DecomposeServer) error {
+	return status.Errorf(codes.Unimplemented, "method Decompose not implemented")
+}
+func (UnimplementedCalculatorServiceServer) ComputeAverage(CalculatorService_ComputeAverageServer) error {
+	return status.Errorf(codes.Unimplemented, "method ComputeAverage not implemented")
+}
+func (UnimplementedCalculatorServiceServer) FindMaximum(CalculatorService_FindMaximumServer) error {
+	return status.Errorf(codes.Unimplemented, "method FindMaximum not implemented")
+}
+func (UnimplementedCalculatorServiceServer) CalculateWithDeadline(context.Context, *CalculateWithDeadlineRequest) (*CalculateWithDeadlineResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CalculateWithDeadline not implemented")
 }
 func (UnimplementedCalculatorServiceServer) mustEmbedUnimplementedCalculatorServiceServer() {}
 
@@ -88,6 +214,97 @@ func _CalculatorService_TimesTen_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CalculatorService_Decompose_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(DecomposeRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(CalculatorServiceServer).Decompose(m, &calculatorServiceDecomposeServer{stream})
+}
+
+type CalculatorService_DecomposeServer interface {
+	Send(*DecomposeResponse) error
+	grpc.ServerStream
+}
+
+type calculatorServiceDecomposeServer struct {
+	grpc.ServerStream
+}
+
+func (x *calculatorServiceDecomposeServer) Send(m *DecomposeResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _CalculatorService_ComputeAverage_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(CalculatorServiceServer).ComputeAverage(&calculatorServiceComputeAverageServer{stream})
+}
+
+type CalculatorService_ComputeAverageServer interface {
+	SendAndClose(*ComputeAverageResponse) error
+	Recv() (*ComputeAverageRequest, error)
+	grpc.ServerStream
+}
+
+type calculatorServiceComputeAverageServer struct {
+	grpc.ServerStream
+}
+
+func (x *calculatorServiceComputeAverageServer) SendAndClose(m *ComputeAverageResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *calculatorServiceComputeAverageServer) Recv() (*ComputeAverageRequest, error) {
+	m := new(ComputeAverageRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _CalculatorService_FindMaximum_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(CalculatorServiceServer).FindMaximum(&calculatorServiceFindMaximumServer{stream})
+}
+
+type CalculatorService_FindMaximumServer interface {
+	Send(*FindMaximumResponse) error
+	Recv() (*FindMaximumRequest, error)
+	grpc.ServerStream
+}
+
+type calculatorServiceFindMaximumServer struct {
+	grpc.ServerStream
+}
+
+func (x *calculatorServiceFindMaximumServer) Send(m *FindMaximumResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *calculatorServiceFindMaximumServer) Recv() (*FindMaximumRequest, error) {
+	m := new(FindMaximumRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _CalculatorService_CalculateWithDeadline_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CalculateWithDeadlineRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CalculatorServiceServer).CalculateWithDeadline(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.CalculatorService/CalculateWithDeadline",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CalculatorServiceServer).CalculateWithDeadline(ctx, req.(*CalculateWithDeadlineRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CalculatorService_ServiceDesc is the grpc.ServiceDesc for CalculatorService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -99,7 +316,28 @@ var CalculatorService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "TimesTen",
 			Handler:    _CalculatorService_TimesTen_Handler,
 		},
+		{
+			MethodName: "CalculateWithDeadline",
+			Handler:    _CalculatorService_CalculateWithDeadline_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Decompose",
+			Handler:       _CalculatorService_Decompose_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "ComputeAverage",
+			Handler:       _CalculatorService_ComputeAverage_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "FindMaximum",
+			Handler:       _CalculatorService_FindMaximum_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "proto/services.proto",
 }
