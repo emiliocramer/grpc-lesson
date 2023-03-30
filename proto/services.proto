@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "./main";
+
+service CalculatorService {
+  rpc TimesTen(Message) returns (Response) {}
+}
+
+message Message {
+  string say = 1;
+}
+
+message Response {
+  string say = 1;
+}
+
